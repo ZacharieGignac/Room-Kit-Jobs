@@ -1,0 +1,46 @@
+var asciitable = require('ascii-table');
+const AsciiTable = require('ascii-table/ascii-table');
+
+exports.name = 'GetVideoStatus';
+exports.friendlyName = 'Get Video Status Report';
+exports.version = '0.0.1';
+exports.description = 'Displays current system video status, inputs and outputs';
+
+
+module.exports.action = async (system, params) => {
+
+    try {
+        var videoInputStatus = await system.xapiClient.xapi.Status.Video.Input.get();
+        var table = new AsciiTable(`Input Connectors for ${system.name} (${system.address})`);
+        table.setHeading('id', 'Type', 'Connected', 'SignalState', 'SourceId')
+        for (const connector of videoInputStatus.Connector) {
+            
+            table.addRow(connector.id, connector.Type, connector.Connected, connector.SignalState, connector.SourceId );
+        }
+        console.log(table.toString());
+        
+        var videoOutputStatus = await system.xapiClient.xapi.Status.Video.Output.get();
+        var table = new AsciiTable(`Output Connectors for ${system.name} (${system.address})`);
+        table.setHeading('id', 'Type', 'Connected', 'Resolution', 'HDCP');
+        for (const connector of videoOutputStatus.Connector) {
+            
+            table.addRow(connector.id, connector.Type, connector.Connected, getResolution(connector.Resolution), JSON.stringify(connector.HDCP));
+        }
+        console.log(table.toString());
+
+    }
+    catch (error) {
+        console.log(error);
+    }
+
+    system.actionDone();
+}
+
+function getResolution(res) {
+    if (res) {
+        return `${res.Width}x${res.Height}@${res.RefreshRate}`;
+    }
+    else {
+        return "<no informations>";
+    }
+}

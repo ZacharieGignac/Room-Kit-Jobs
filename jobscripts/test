@@ -1,0 +1,5 @@
+#Test script
+set exit 2000
+systems load me
+actions add GetVersion
+run

@@ -1,0 +1,8 @@
+#Gets como systems backup
+systems load me
+actions add FullSystemBackup
+run
+then
+log BACKUP IS DONE
+sleep 5000
+exit

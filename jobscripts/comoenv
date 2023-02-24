@@ -1,0 +1,7 @@
+#Gets como systems version
+systems load como
+actions add GetEnv
+run
+then
+log Getting environment info done.
+exit

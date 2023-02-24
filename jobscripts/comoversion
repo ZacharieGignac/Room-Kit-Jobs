@@ -1,0 +1,7 @@
+#Gets como systems version
+systems load como
+actions add GetVersion
+run
+then
+log COMOVERSION IS DONE
+exit
