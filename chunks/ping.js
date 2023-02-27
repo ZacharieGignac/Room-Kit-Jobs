@@ -5,7 +5,8 @@ exports.description = 'Add the "ping" command to ping all loaded systems at once
 
 module.exports.chunk = class {
     constructor(api) {
-        api.addCommand(this.pong, 'ping', 'Get pong for free!');
+        var that = this;
+        api.addCommand(that.pong, 'ping', 'Get pong for free!');
     }
     pong() {
         console.log('PONG!');

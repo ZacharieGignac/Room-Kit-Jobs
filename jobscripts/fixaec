@@ -1,0 +1,8 @@
+#Fix systems AEC settings
+systems load me
+actions add SetAECVolumeControlOff
+run
+then
+log DONE.
+sleep 5000
+exit

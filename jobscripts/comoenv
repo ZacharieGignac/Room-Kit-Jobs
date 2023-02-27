@@ -3,5 +3,7 @@ systems load como
 actions add GetEnv
 run
 then
-log Getting environment info done.
+log Getting environment info done. Displaying report.
+sleep 1000
+envreport
 exit

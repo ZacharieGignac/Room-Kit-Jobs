@@ -21,6 +21,8 @@ var auth = {
 var currentSystem = 0;
 var commands = [];
 var vars = [];
+var chunks = []
+
 var running = false;
 var remainingJobScript;
 var jobStartTime;
@@ -174,7 +176,7 @@ function runNextAction(system, keepRunning) {
         try {
             var newAction = require(`./actions/${system.currentAction.action}`);
             if (system.connected) {
-                newAction.action(system, system.currentAction.params);
+                newAction.action(system, system.currentAction.params,vars);
             }
             else {
                 console.log(`[ACTION ERROR] Can't run action ${newAction.name} on ${system.name}, not connected. Use 'run' to connect all systems.`);
@@ -436,7 +438,20 @@ function registerCommands() {
 
 
 
+var api = {
+    addCommand: addCommand,
+    log: log
+}
+
 console.log(color.red(`RKJOB ${version}`));
+/* Load chunks first */
+fs.readdir('./chunks', (err, files) => {
+    for(const file of files) {
+        var chunkReq = require('./chunks/' + file);
+        chunks.push(new chunkReq.chunk(api,vars));
+    }
+});
+
 registerCommands();
 if (process.argv[2]) {
     parseCommand(`job load ${process.argv[2]}`);
@@ -445,10 +460,14 @@ else {
     console.log(`Running interactive prompt:`);
 }
 
-var api = {
-    addCommand: addCommand,
-    log: log
-}
+
+
+/*
+
 var testReq = require('./chunks/ping.js');
 const { description } = require('./actions/GetVideoStatus');
-var chunk = new testReq.chunk(api);
+var chunk = new testReq.chunk(api, vars);
+
+var testReq2 = require('./chunks/envreport.js');
+var chunk2 = new testReq2.chunk(api, vars);
+*/
