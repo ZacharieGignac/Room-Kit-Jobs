@@ -1,5 +1,5 @@
 #Gets como systems version
-systems load como
+systems load como.z
 actions add GetVersion
 run
 then

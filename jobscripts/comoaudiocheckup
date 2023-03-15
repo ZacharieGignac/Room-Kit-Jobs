@@ -1,6 +1,6 @@
 #Fix systems AEC settings
-systems load me
-actions add SetAECVolumeControlOff
+systems load como.z
+actions add ComoAudioCheckup
 run
 then
 log DONE.

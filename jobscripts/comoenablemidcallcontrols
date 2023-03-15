@@ -1,0 +1,8 @@
+#Enable mid call controls
+systems load como.z
+actions add enableMidCallControls
+run
+then
+log DONE.
+sleep 5000
+exit

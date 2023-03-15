@@ -1,0 +1,8 @@
+#Check como room vacancy
+systems load como.z
+actions add Vacant
+run
+then
+log DONE.
+sleep 5000
+exit

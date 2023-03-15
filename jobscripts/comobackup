@@ -1,5 +1,5 @@
 #Gets como systems backup
-systems load me
+systems load como.z
 actions add FullSystemBackup
 run
 then

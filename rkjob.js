@@ -140,7 +140,7 @@ function getRunningActionsText(arr) {
 
 
 
-function runNextAction(system, keepRunning) {
+async function runNextAction(system, keepRunning) {
     if (running) {
         if (countRemainingActions() == 0) {
             running = false;
@@ -148,14 +148,14 @@ function runNextAction(system, keepRunning) {
                 executeJobScript();
                 setTimeout(() => {
                     console.log(`[JOB] Done. Some actions are still running. Use 'actions list' for details.`)
-                    console.log(`[JOB] Elapsed time : ${calculateElapsedTimeInSeconds(jobStartTime,new Date())} seconds`);
+                    console.log(`[JOB] Elapsed time : ${calculateElapsedTimeInSeconds(jobStartTime, new Date())} seconds`);
                 }, (1000));
 
             }
             else {
                 setTimeout(() => {
                     console.log(`[JOB] Done.`);
-                    console.log(`[JOB] Elapsed time : ${calculateElapsedTimeInSeconds(jobStartTime,new Date())} seconds`);
+                    console.log(`[JOB] Elapsed time : ${calculateElapsedTimeInSeconds(jobStartTime, new Date())} seconds`);
                     executeJobScript();
                     if (vars["exit"]) {
                         setTimeout(() => process.exit(0), vars["exit"]);
@@ -163,7 +163,7 @@ function runNextAction(system, keepRunning) {
                 }, 1000);
 
             }
-            
+
         }
     }
     if (keepRunning) {
@@ -176,7 +176,7 @@ function runNextAction(system, keepRunning) {
         try {
             var newAction = require(`./actions/${system.currentAction.action}`);
             if (system.connected) {
-                newAction.action(system, system.currentAction.params,vars);
+                await newAction.action(system, system.currentAction.params, vars);
             }
             else {
                 console.log(`[ACTION ERROR] Can't run action ${newAction.name} on ${system.name}, not connected. Use 'run' to connect all systems.`);
@@ -249,10 +249,12 @@ function systemsCommand(input) {
     else if (systemsCommand == 'load') {
         console.log(`[SYSTEMS] Loading system address book '${inputSplit[2]}'`);
         const loadedSystems = readAddressBookFile(inputSplit[2]);
-        for (const system of loadedSystems) {
-            addSystem(system.name.trim(), system.address.trim(), system.username.trim(), system.password.trim());
+        if (loadedSystems != undefined) {
+            for (const system of loadedSystems) {
+                addSystem(system.name.trim(), system.address.trim(), system.username.trim(), system.password.trim());
+            }
+            console.log(`[SYSTEMS] Loading completed.`);
         }
-        console.log(`[SYSTEMS] Loading completed.`);
     }
     else if (systemsCommand == 'list') {
         if (systems.length > 0) {
@@ -308,13 +310,20 @@ function addSystem(name, address, username, password) {
 }
 
 function readAddressBookFile(file) {
-    const fileContent = fs.readFileSync(`./addressbooks/${file}`, 'utf-8');
-    const lines = fileContent.split(os.EOL);
-    const objects = lines.map(line => {
-        const [name, address, username, password] = line.trim().split(',');
-        return { name, address, username, password };
-    });
-    return objects;
+    try {
+        const fileContent = fs.readFileSync(`./addressbooks/${file}`, 'utf-8');
+        const lines = fileContent.split(os.EOL);
+        const objects = lines.map(line => {
+            const [name, address, username, password] = line.trim().split(',');
+            return { name, address, username, password };
+        });
+        return objects;
+    }
+    catch {
+        console.log(color.red(`[SYSTEM] Error! No such addressbook "${file}"`));
+        return undefined;
+    }
+    
 }
 
 function log(text) {
@@ -324,9 +333,9 @@ function log(text) {
 async function setJobScript(file) {
     console.log(`[JOB] Setting job script ${file}`);
     const fileContent = fs.readFileSync(`./jobscripts/${file}`, 'utf-8');
-    
+
     const lines = fileContent.split(os.EOL);
-    remainingJobScript = lines;    
+    remainingJobScript = lines;
     executeJobScript();
 }
 async function executeJobScript() {
@@ -338,18 +347,18 @@ async function executeJobScript() {
             const sleepTime = parseInt(lineSplit[1]);
             await sleep(sleepTime);
         }
-        else if (lineSplit[0].substring(0, 1) == '#') {  }
+        else if (lineSplit[0].substring(0, 1) == '#') { }
         else {
             if (line == 'then') {
                 console.log(`[JOB] Pausing execution due to 'then' statement. Will resume when current job is done.`);
-                remainingJobScript.splice(0,1);
+                remainingJobScript.splice(0, 1);
                 break;
             }
             else {
                 parseCommand(line);
             }
         }
-        remainingJobScript.splice(0, 1);        
+        remainingJobScript.splice(0, 1);
     }
     console.log(`[JOB] Execution finished.`);
 }
@@ -446,9 +455,9 @@ var api = {
 console.log(color.red(`RKJOB ${version}`));
 /* Load chunks first */
 fs.readdir('./chunks', (err, files) => {
-    for(const file of files) {
+    for (const file of files) {
         var chunkReq = require('./chunks/' + file);
-        chunks.push(new chunkReq.chunk(api,vars));
+        chunks.push(new chunkReq.chunk(api, vars));
     }
 });
 
